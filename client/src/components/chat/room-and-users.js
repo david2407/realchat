@@ -1,17 +1,19 @@
 // client/src/pages/chat/room-and-users.js
 
-import styles from './styles.module.css';
+import styles from '../../pages/chat/styles.module.css';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
 
-const RoomAndUsers = ({ socket, username, room }) => {
+const RoomAndUsers = ({ socket }) => {
   const [roomUsers, setRoomUsers] = useState([]);
+ 
+  const {room, nickname, username} = useSelector((state) => state.chat.value);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     socket.on('chatroom_users', (data) => {
-      console.log(data);
       setRoomUsers(data);
       localStorage.users = JSON.stringify(...data)
     });
@@ -19,26 +21,20 @@ const RoomAndUsers = ({ socket, username, room }) => {
     return () => socket.off('chatroom_users');
   }, [socket]);
 
-  useEffect(() => {
-    if(localStorage.users) {
-      console.log(localStorage.users)
-    }
-  }, [])
-
 
   const leaveRoom = () => {
     const __createdtime__ = Date.now();
-    socket.emit('leave_room', { username, room, __createdtime__ });
+    socket.emit('leave_room', { nickname, room, __createdtime__ });
     localStorage.removeItem("users");
-    // Redirect to home page
     navigate('/', { replace: true });
   };
 
+
   return (
     <div className={styles.roomAndUsersColumn}>
-      <h2 className={styles.roomTitle}>{room}</h2>
+      <h2 className={styles.roomTitle}>{`${room} ROOM`}</h2>
 
-      <div>
+      <div className={styles.roomDiv}>
         {roomUsers.length > 0 && <h5 className={styles.usersTitle}>Users:</h5>}
         <ul className={styles.usersList}>
           {roomUsers && roomUsers.map((user) => (
@@ -48,14 +44,14 @@ const RoomAndUsers = ({ socket, username, room }) => {
               }}
               key={user.id}
             >
-              {user.username}
+              {user.nickname}
             </li>
           ))}
         </ul>
       </div>
 
       <button className='btn btn-outline' onClick={leaveRoom}>
-        Leave
+        Leave {room} Room
       </button>
     </div>
   );
