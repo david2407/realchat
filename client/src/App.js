@@ -6,7 +6,7 @@ import { io } from "socket.io-client";
 import Chat from './pages/chat'
 import { useEffect } from 'react';
 
-const socket = io("http://localhost:4000")
+const socket = io()
 
 function App() {
  

@@ -37,3 +37,7 @@
   .input option {
     margin-top: 20px;
   }
+
+  .error{
+    color: red;
+  }

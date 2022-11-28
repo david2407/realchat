@@ -1,12 +1,9 @@
 // client/src/pages/chat/send-message.js
 import styles from '../../pages/chat/styles.module.css';
 import React, {    useState } from 'react';
-import { GiphyFetch } from '@giphy/js-fetch-api'
 import { vanillaJSCarousel } from '../../components/giphyComponents/carousel'
 import { useSelector } from "react-redux";
-
-const gf = new GiphyFetch('yH0AdrTiX36tre5ytdUZoMyBOfb7ILcx')
-
+import { gpiphySearch, giftIdentifier } from '../../resources/constants';
 
 
 const SendMessage = ({ socket}) => {
@@ -16,7 +13,7 @@ const SendMessage = ({ socket}) => {
   const carouselTarget = document.getElementById("carousel");
 
   const onClickGift = (giftID) => {
-    const msg = `G_I_F_T=${giftID}`
+    const msg = `${giftIdentifier}=${giftID}`
     sendMessageToSocket(msg)
     setMessage('');
     carouselTarget.replaceChildren();
@@ -29,13 +26,12 @@ const SendMessage = ({ socket}) => {
     setMessage('');
   }
 
-
   const sendMessage = () => {
     if (message !== '') {
-      if (!message.includes('/giphy')) {
+      if (!message.includes(gpiphySearch)) {
         sendMessageToSocket(message)
       } else {
-        const textToSearch = message.split('/giphy')[1]
+        const textToSearch = message.split(gpiphySearch)[1]
         vanillaJSCarousel(carouselTarget, textToSearch, onClickGift)
       }
 

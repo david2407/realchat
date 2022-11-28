@@ -1,7 +1,7 @@
 import styles from '../../pages/chat/styles.module.css';
 import { useState, useEffect, useRef } from 'react';
-import vanillaJSGif from "../giphyComponents/gift";
-import { formatDateFromTimestamp} from '../../resources/utils'
+import { formatDateFromTimestamp, fillGift, sortMessagedByDate} from '../../resources/utils'
+import {giftIdentifier} from '../../resources/constants'
 
 const Messages = ({ socket }) => {
   const [messagesRecieved, setMessagesReceived] = useState([]);
@@ -20,7 +20,7 @@ const Messages = ({ socket }) => {
         },
       ]);
     });
-    fillGift()
+    fillGift(messagesRecieved)
     // Remove event listener on component unmount
     return () => socket.off('receive_message');
   }, [socket]);
@@ -36,30 +36,11 @@ const Messages = ({ socket }) => {
     return () => socket.off('last_100_messages')
   }, [socket])
 
-  const fillGift = () => {
-    messagesRecieved.forEach(msg => {
-      if (msg.message.includes('G_I_F_T=')) {
-        const gift = msg.message.split('G_I_F_T=')[1]
-        let elem = document.getElementById(msg.id)
-        if (!elem) elem = document.getElementById(msg.message.split('G_I_F_T=')[1])
-        if (elem) {
-          elem.replaceChildren()
-          vanillaJSGif(elem, gift)
-        }
-      }
-    })
-  }
 
   useEffect(() => {
     messagesColumnRef.current.scrollTop = messagesColumnRef.current.scrollHeight;
-    fillGift()
+    fillGift(messagesRecieved)
   }, [messagesRecieved])
-
-
-
-  function sortMessagedByDate(messages) {
-    return messages.sort((a, b) => parseInt(a.__createdtime__) - parseInt(b.__createdtime__))
-  }
 
 
   return (
@@ -80,7 +61,7 @@ const Messages = ({ socket }) => {
             </span>
           </div>
           <p/>
-          <div className={styles.msgText} id={!msg.id ? msg.message.split('G_I_F_T=')[1] : msg.id}>
+          <div className={styles.msgText} id={!msg.id ? msg.message.split(`${giftIdentifier}=`)[1] : msg.id}>
             {msg.message}
 
           </div>

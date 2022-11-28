@@ -7,8 +7,7 @@ import { useSelector } from "react-redux";
 
 const RoomAndUsers = ({ socket }) => {
   const [roomUsers, setRoomUsers] = useState([]);
-  const chatInfo = useSelector((state) => state.chat.value);
-  console.log(chatInfo)
+ 
   const {room, nickname, username} = useSelector((state) => state.chat.value);
 
   const navigate = useNavigate();
@@ -27,9 +26,9 @@ const RoomAndUsers = ({ socket }) => {
     const __createdtime__ = Date.now();
     socket.emit('leave_room', { nickname, room, __createdtime__ });
     localStorage.removeItem("users");
-    // Redirect to home page
     navigate('/', { replace: true });
   };
+
 
   return (
     <div className={styles.roomAndUsersColumn}>
