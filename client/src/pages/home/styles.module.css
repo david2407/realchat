@@ -25,6 +25,15 @@
     border: 1px solid rgb(63, 73, 204);
     font-size: 0.9rem;
   }
+
+  .files{
+    display:none
+  }
+
+  .img{
+    width: 35%;
+    height: 10vh;
+  }
   .input option {
     margin-top: 20px;
   }

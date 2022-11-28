@@ -1,27 +1,48 @@
 import styles from './styles.module.css'
-
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from "react-redux";
+import { setImage, setNickname, setRoom, setUsername } from '../../store/chats/chatSlice';
+import TitleComponent from '../../components/home/title'
+import UserImage from '../../components/home/image'
+import CustomInput from '../../components/home/customInput'
+import CustomSelect from '../../components/home/customSelect'
 
-const Home = ({ username, setUsername, room, setRoom, socket }) => {
+const Home = ({ socket, roomsArray }) => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const title = `   Ocean Chat   `
+
+    const { image, room, nickname, username } = useSelector((state) => state.chat.value);
+
+    useEffect(() => {
+        setImage('')
+    }, [])
+
     const joinRoom = () => {
-        room !== '' && username !== '' && (socket.emit('join_room', { username, room }) && navigate('/chat', { replace: true }))
+        room !== '' && username !== '' && nickname !== '' && (socket.emit('join_room', { username, nickname, image, room }) && navigate('/chat', { replace: true }))
+        localStorage.setItem(`${username}--${room}`, image)
     }
+
+   
+
     return (
         <div className={styles.container}>
             <div className={styles.formContainer}>
-                <h1>{` <>PetroChat</>`}</h1>
-                <input className={styles.input} placeholder='Username...' onChange={(e) => setUsername(e.target.value)}></input>
+                <TitleComponent title={title} />
 
-                <select className={styles.input} onChange={(e) => setRoom(e.target.value)}>
-                    <option>-- Select Room --</option>
-                    <option value='debates'>Debates</option>
-                    <option value='politica'>Politica</option>
-                    <option value='economia'>Economia</option>
-                </select>
+                {image && <UserImage image={image} className={styles.img}/>}
 
-                <button className='btn btn-secondary' style={{ width: '100%' }} onClick={joinRoom}>Join Room</button>
+                <CustomInput className={styles.input} placeholder='Nickname...' onChange={(e) => dispatch(setNickname(e.target.value))}></CustomInput>
+
+                <input type="file" id="files" className={styles.files} placeholder='User Image...' onChange={(e) => dispatch(setImage(URL.createObjectURL(e.target.files[0])))}></input>
+                <label className={styles.input} for="files">Select User Image</label>
+
+                <CustomInput className={styles.input} placeholder='Username...' onChange={(e) => dispatch(setUsername(e.target.value))}></CustomInput>
+
+                {roomsArray &&  <CustomSelect className={styles.input} onChange={(e) => dispatch(setRoom(e.target.value))} roomsArray={roomsArray} />}
+
+                <button className='btn btn-secondary' style={{ width: '100%' }} onClick={joinRoom}>Join Into the Ocean</button>
             </div>
         </div>
     )

@@ -5,7 +5,7 @@ html * {
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: auto;
   background: rgb(63, 73, 204);
 }
 ::-webkit-scrollbar {
@@ -35,6 +35,7 @@ body {
   color: rgb(153, 217, 234);
   border: 1px solid rgb(153, 217, 234);
   background: rgb(63, 73, 204);
+  width: 100%;
 }
 .btn-primary {
   background: rgb(153, 217, 234);

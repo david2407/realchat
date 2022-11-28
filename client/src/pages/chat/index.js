@@ -1,15 +1,23 @@
 import styles from './styles.module.css'
-import MessagesRecived from './messages'
-import SendMessage from './send-message'
-import RoomAndUsersColumn from './room-and-users'
+import MessagesRecived from '../../components/chat/messages'
+import SendMessage from '../../components/chat/send-message'
+import RoomAndUsersColumn from '../../components/chat/room-and-users'
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
 
-const Chat = ({ socket, room, username }) => {
+const Chat = ({ socket }) => {
+   
+    const navigate = useNavigate();
+    const { room } = useSelector((state) => state.chat.value);
+
+    if(!room) navigate('/', { replace: true });
+
     return (
         <div className={styles.chatContainer}>
-            <RoomAndUsersColumn socket={socket} username={username} room={room}/>
-            <div>
+            <RoomAndUsersColumn socket={socket}/>
+            <div className={styles.chatColumn}>
                 <MessagesRecived socket={socket} />
-                <SendMessage socket={socket} username={username} room={room} />
+                <SendMessage socket={socket} />
             </div>
         </div>
     )
