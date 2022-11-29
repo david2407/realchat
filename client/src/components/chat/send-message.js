@@ -21,7 +21,6 @@ const SendMessage = ({ socket}) => {
 
   const sendMessageToSocket = (pMessage) => {
     const __createdtime__ = Date.now();
-    // Send message to server. We can't specify who we send the message to from the frontend. We can only send to server. Server reply message to other users in room
     socket.emit('send_message', { username, room, message: pMessage, __createdtime__ });
     setMessage('');
   }
