@@ -13,15 +13,7 @@ dotenv.config()
 
 //socket io events
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-    cors: {
-        //origin: "https://petro-chat-front.herokuapp.com",
-        origin: "http://localhost:3000",
-        //allowedHeaders: ["my-custom-header"],
-        //credentials: true,
-        methods: ['GET', 'POST']
-    }
-});
+const io = new Server(httpServer);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -38,11 +30,16 @@ let allUsers = []
 io.on('connection', socket => {
     //console.log(`User connected ${socket.id}`)
 
+    helperGetRooms()
+        .then(rooms => {
+            socket.emit('get_rooms', rooms)
+        }).catch(err => console.log(err))
 
 
     socket.on('join_room', (data) => {
-        const { username, room } = data
+        const { username, nickname, image, room } = data
         socket.join(room)
+        console.log(room, username)
 
         harperGetMessages(room)
             .then(lastMessages => {
@@ -53,33 +50,32 @@ io.on('connection', socket => {
         let __createdtime__ = Date.now()
 
         chatRoom = room
-        allUsers.push({ id: socket.id, username, room })
+        allUsers.push({ id: socket.id, username, nickname, image, room })
         const chatRoomUsers = allUsers.filter(user => user.room === room)
         socket.to(room).emit('chatroom_users', chatRoomUsers)
         socket.emit('chatroom_users', chatRoomUsers)
 
         socket.to(room).emit('receive_message', {
-            message: `${username} has joined the chat room`,
+            message: `${nickname} has joined the chat room`,
             username: CHAT_BOT,
             __createdtime__
         })
 
         socket.emit('receive_message', {
-            message: `Welcome ${username}`,
+            message: `Welcome ${nickname}`,
             username: CHAT_BOT,
             __createdtime__
         })
     })
 
     socket.on('send_message', (data) => {
-        const { message, username, room, __createdtime__ } = data
+        const { message, username, nickename, room, __createdtime__ } = data
         io.in(room).emit('receive_message', data)
-        harperSaveMessage(message, username, room, __createdtime__)
+        harperSaveMessage(message, username, nickename, room, __createdtime__)
             .then(res => console.log(res))
             .catch(err => console.log(err))
     })
 
-    // Add this
     socket.on('disconnect', () => {
         console.log('User disconnected from the chat');
         const user = allUsers.find((user) => user.id == socket.id);
@@ -93,7 +89,7 @@ io.on('connection', socket => {
     });
 
     socket.on('leave_room', data => {
-        const { username, room } = data
+        const { nickname, room } = data
         socket.leave(room)
         const __createdtime__ = Date.now()
 
@@ -101,7 +97,7 @@ io.on('connection', socket => {
         socket.to(room).emit('chatroom_users', allUsers)
         socket.to(room).emit('receive_message', {
             username: CHAT_BOT,
-            message: `${username} has left the chat`,
+            message: `${nickname} has left the chat`,
             __createdtime__
         })
     })
@@ -138,7 +134,35 @@ function harperGetMessages(room) {
     });
 }
 
-function harperSaveMessage(message, username, room, __createdtime__) {
+function helperGetRooms() {
+    const dbUrl = process.env.HARPERDB_URL;
+    const dbPw = process.env.HARPERDB_PW;
+    if (!dbUrl || !dbPw) return null;
+
+    let data = JSON.stringify({
+        operation: 'sql',
+        sql: `SELECT * FROM realtime_chat_app.rooms`,
+    });
+
+    let config = {
+        method: 'post',
+        url: dbUrl,
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Basic ' + dbPw,
+        },
+        data: data,
+    };
+
+    return new Promise((resolve, reject) => {
+        axios(config)
+            .then(res => resolve(JSON.stringify(res.data)))
+            .catch(error => reject(error))
+    })
+
+}
+
+function harperSaveMessage(message, username, nickename, room, __createdtime__) {
     const dbUrl = process.env.HARPERDB_URL
     const dbPw = process.env.HARPERDB_PW
 
@@ -156,6 +180,7 @@ function harperSaveMessage(message, username, room, __createdtime__) {
             {
                 message,
                 username,
+                nickename,
                 room
             }
         ]
@@ -179,14 +204,9 @@ function harperSaveMessage(message, username, room, __createdtime__) {
     })
 }
 
-function leaveRoom(userID, chatRoomUsers){
-    return chatRoomUsers.filter( user => user.id != userID)
+function leaveRoom(userID, chatRoomUsers) {
+    return chatRoomUsers.filter(user => user.id != userID)
 }
-
-
-
-console.log((join(__dirname, "../client/build")))
-
 
 
 /* app.get('/', (req, res) => {
