@@ -2,6 +2,9 @@
 
 Nodejs backend based server with express framework. It uses axios to get and post info into the harper database to persist data and use socket.io for streaming data between client project and server in real time.
 
+# APP LINK
+
+https://intotheocean.herokuapp.com/
 # HOW TO USE
 
 Yo have to enter information like nickname, username and select a room to be able to chat. The chat info is peristed into harper database cloud by user and room
