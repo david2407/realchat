@@ -1,3 +1,5 @@
-export function leaveRoom(userID, chatRoomUsers){
+ function leaveRoom(userID, chatRoomUsers){
     return chatRoomUsers.filter( user => user.id != userID)
 }
+
+export {leaveRoom}

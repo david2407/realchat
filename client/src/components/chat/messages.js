@@ -8,7 +8,6 @@ const Messages = ({ socket }) => {
 
   const messagesColumnRef = useRef(null)
 
-  // Runs whenever a socket event is recieved from the server
   useEffect(() => {
     socket.on('receive_message', (data) => {
       setMessagesReceived((state) => [
@@ -16,19 +15,18 @@ const Messages = ({ socket }) => {
         {
           message: data.message,
           username: data.username,
+          room: data.room,
           __createdtime__: data.__createdtime__,
         },
       ]);
     });
     fillGift(messagesRecieved)
-    // Remove event listener on component unmount
     return () => socket.off('receive_message');
-  }, [socket]);
+  }, [socket, messagesRecieved]);
 
   useEffect(() => {
     socket.on('last_100_messages', (last100Messages) => {
       let messages = JSON.parse(last100Messages);
-      console.log(messages)
       messages = sortMessagedByDate(messages)
       setMessagesReceived(state => [...messages, ...state])
     })
